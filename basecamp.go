@@ -40,6 +40,15 @@ type (
 		Archived    bool   `json:"archived"`
 		Starred     bool   `json:"starred"`
 	}
+
+	TodoList struct {
+		Id             int    `json:"id"`
+		Name           string `json:"name"`
+		Description    string `json:"description"`
+		Completed      bool   `json:"completed"`
+		CompletedCount int    `json:"completed_count"`
+		RemainingCount int    `json:"remaining_count"`
+	}
 )
 
 func (c *Client) GetAccounts() ([]*Account, error) {
@@ -92,6 +101,19 @@ func (c *Client) GetProjects(accountID int) ([]*Project, error) {
 		return nil, err
 	}
 	var result []*Project
+	if err := json.Unmarshal(b, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (c *Client) GetTodoLists(accountID int) ([]*TodoList, error) {
+	url := fmt.Sprintf(baseURL, accountID, "todolists.json")
+	b, err := c.get(url)
+	if err != nil {
+		return nil, err
+	}
+	var result []*TodoList
 	if err := json.Unmarshal(b, &result); err != nil {
 		return nil, err
 	}

@@ -14,6 +14,7 @@ func main() {
 		accounts    []*basecamp.Account
 		projects    []*basecamp.Project
 		people      []*basecamp.Person
+		todoLists   []*basecamp.TodoList
 	)
 
 	if accessToken = os.Getenv("BASECAMP_ACCESS_TOKEN"); accessToken == "" {
@@ -39,15 +40,24 @@ func main() {
 		return
 	}
 
+	if todoLists, err = c.GetTodoLists(accountId); err != nil {
+		log.Printf("ERROR %q", err)
+		return
+	}
+
 	for _, account := range accounts {
-		log.Printf("Account: %v", account)
+		log.Printf("Account: %+v", account)
 	}
 
 	for _, person := range people {
-		log.Printf("Person: %v", person)
+		log.Printf("Person: %+v", person)
 	}
 
 	for _, project := range projects {
-		log.Printf("Project: %v", project)
+		log.Printf("Project: %+v", *project)
+	}
+
+	for _, todoList := range todoLists {
+		log.Printf("Todolist: %+v", *todoList)
 	}
 }
