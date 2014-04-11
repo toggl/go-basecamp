@@ -48,6 +48,12 @@ type (
 		Completed      bool   `json:"completed"`
 		CompletedCount int    `json:"completed_count"`
 		RemainingCount int    `json:"remaining_count"`
+		ProjectId      int    `json:"project_id"`
+		Bucket         struct {
+			Id   int    `json:"id"`
+			Name string `json:"name"`
+			Type string `json:"type"`
+		}
 	}
 )
 
@@ -117,6 +123,12 @@ func (c *Client) GetTodoLists(accountID int) ([]*TodoList, error) {
 	if err := json.Unmarshal(b, &result); err != nil {
 		return nil, err
 	}
+	for _, todoList := range result {
+		if todoList.Bucket.Type == "Project" {
+			todoList.ProjectId = todoList.Bucket.Id
+		}
+	}
+
 	return result, nil
 }
 
