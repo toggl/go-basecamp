@@ -41,6 +41,12 @@ type (
 		Starred     bool   `json:"starred"`
 	}
 
+	Todo struct {
+		Id      int    `json:"id"`
+		Content string `json:"content"`
+		DueAt   string `json:"due_at"`
+	}
+
 	TodoList struct {
 		Id             int    `json:"id"`
 		Name           string `json:"name"`
@@ -49,10 +55,16 @@ type (
 		CompletedCount int    `json:"completed_count"`
 		RemainingCount int    `json:"remaining_count"`
 		ProjectId      int    `json:"project_id"`
-		Bucket         struct {
+
+		Bucket struct {
 			Id   int    `json:"id"`
 			Name string `json:"name"`
 			Type string `json:"type"`
+		}
+
+		Todos struct {
+			Remaining []*Todo `json:"remaining"`
+			Completed []*Todo `json:"completed"`
 		}
 	}
 )
@@ -129,6 +141,19 @@ func (c *Client) GetTodoLists(accountID int) ([]*TodoList, error) {
 		}
 	}
 
+	return result, nil
+}
+
+func (c *Client) GetTodoList(accountID, projectID, listID int) (*TodoList, error) {
+	url := fmt.Sprintf(baseURL, accountID, fmt.Sprintf("projects/%d/todolists/%d.json", projectID, listID))
+	b, err := c.get(url)
+	if err != nil {
+		return nil, err
+	}
+	var result *TodoList
+	if err := json.Unmarshal(b, &result); err != nil {
+		return nil, err
+	}
 	return result, nil
 }
 
