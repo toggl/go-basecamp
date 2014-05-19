@@ -126,7 +126,15 @@ func (c *Client) GetProjects(accountID int) ([]*Project, error) {
 }
 
 func (c *Client) GetTodoLists(accountID int) ([]*TodoList, error) {
-	url := fmt.Sprintf(baseURL, accountID, "todolists.json")
+	return c.fetchTodoLists(accountID, "todolists.json")
+}
+
+func (c *Client) GetCompletedTodoLists(accountID int) ([]*TodoList, error) {
+	return c.fetchTodoLists(accountID, "todolists/completed.json")
+}
+
+func (c *Client) fetchTodoLists(accountID int, listURL string) ([]*TodoList, error) {
+	url := fmt.Sprintf(baseURL, accountID, listURL)
 	b, err := c.get(url)
 	if err != nil {
 		return nil, err
@@ -140,7 +148,6 @@ func (c *Client) GetTodoLists(accountID int) ([]*TodoList, error) {
 			todoList.ProjectId = todoList.Bucket.Id
 		}
 	}
-
 	return result, nil
 }
 
