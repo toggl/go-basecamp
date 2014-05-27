@@ -133,6 +133,18 @@ func (c *Client) GetCompletedTodoLists(accountID int) ([]*TodoList, error) {
 	return c.fetchTodoLists(accountID, "todolists/completed.json")
 }
 
+func (c *Client) GetAllTodoLists(accountID int) ([]*TodoList, error) {
+	remaining, err := c.GetTodoLists(accountID)
+	if err != nil {
+		return nil, err
+	}
+	completed, err := c.GetCompletedTodoLists(accountID)
+	if err != nil {
+		return nil, err
+	}
+	return append(remaining, completed...), nil
+}
+
 func (c *Client) fetchTodoLists(accountID int, listURL string) ([]*TodoList, error) {
 	url := fmt.Sprintf(baseURL, accountID, listURL)
 	b, err := c.get(url)
