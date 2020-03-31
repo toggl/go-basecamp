@@ -182,7 +182,6 @@ func (c *Client) GetTodoList(accountID, projectID, listID int) (*TodoList, error
 }
 
 func (c *Client) get(url string) ([]byte, error) {
-	start := time.Now()
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -202,11 +201,10 @@ func (c *Client) get(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("BASECAMP REQ", url, "time", time.Since(start))
-	if 304 == resp.StatusCode {
+	if http.StatusNotModified == resp.StatusCode {
 		return []byte("null"), nil
 	}
-	if 200 != resp.StatusCode {
+	if http.StatusOK != resp.StatusCode {
 		return b, fmt.Errorf("%s failed with status code %d", url, resp.StatusCode)
 	}
 	return b, nil
