@@ -1,9 +1,10 @@
 package main
 
 import (
-	"../"
 	"log"
 	"os"
+
+	"github.com/toggl/go-basecamp"
 )
 
 func main() {
