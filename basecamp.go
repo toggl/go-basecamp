@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 const (
@@ -16,7 +17,8 @@ const (
 
 type (
 	Client struct {
-		AccessToken string
+		AccessToken   string
+		ModifiedSince *time.Time
 	}
 
 	Account struct {
@@ -34,27 +36,30 @@ type (
 	}
 
 	Project struct {
-		Id          int    `json:"id"`
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		Archived    bool   `json:"archived"`
-		Starred     bool   `json:"starred"`
+		Id          int       `json:"id"`
+		Name        string    `json:"name"`
+		Description string    `json:"description"`
+		Archived    bool      `json:"archived"`
+		Starred     bool      `json:"starred"`
+		UpdatedAt   time.Time `json:"updated_at"`
 	}
 
 	Todo struct {
-		Id      int    `json:"id"`
-		Content string `json:"content"`
-		DueAt   string `json:"due_at"`
+		Id        int       `json:"id"`
+		Content   string    `json:"content"`
+		DueAt     string    `json:"due_at"`
+		UpdatedAt time.Time `json:"updated_at"`
 	}
 
 	TodoList struct {
-		Id             int    `json:"id"`
-		Name           string `json:"name"`
-		Description    string `json:"description"`
-		Completed      bool   `json:"completed"`
-		CompletedCount int    `json:"completed_count"`
-		RemainingCount int    `json:"remaining_count"`
-		ProjectId      int    `json:"project_id"`
+		Id             int       `json:"id"`
+		Name           string    `json:"name"`
+		Description    string    `json:"description"`
+		Completed      bool      `json:"completed"`
+		CompletedCount int       `json:"completed_count"`
+		RemainingCount int       `json:"remaining_count"`
+		ProjectId      int       `json:"project_id"`
+		UpdatedAt      time.Time `json:"updated_at"`
 
 		Bucket struct {
 			Id   int    `json:"id"`
@@ -183,6 +188,9 @@ func (c *Client) get(url string) ([]byte, error) {
 	}
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Authorization", "Bearer "+c.AccessToken)
+	if c.ModifiedSince != nil {
+		req.Header.Set("If-Modified-Since", c.ModifiedSince.Format(http.TimeFormat))
+	}
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -193,7 +201,10 @@ func (c *Client) get(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if 200 != resp.StatusCode {
+	if http.StatusNotModified == resp.StatusCode {
+		return []byte("null"), nil
+	}
+	if http.StatusOK != resp.StatusCode {
 		return b, fmt.Errorf("%s failed with status code %d", url, resp.StatusCode)
 	}
 	return b, nil
